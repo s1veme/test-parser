@@ -1,15 +1,15 @@
-import asyncio
-
-import aiohttp
+import platform
 
 from parser import Parser
 from report import Report
+import aiohttp
+import asyncio
 
 # Ссылка, на которой будем искать ссылки
 PARSING_URL = 'https://www.kinoafisha.info/rating/movies/'
 
 
-async def get_count_images(session, link, count_links_report) -> None:
+async def get_count_images(session: aiohttp.ClientSession, link: str, count_links_report: Report):
     page = await Parser.get_page(session, link)
     if page is None:
         return
@@ -22,7 +22,7 @@ async def get_count_images(session, link, count_links_report) -> None:
     print(f'На странице {link} было найдено {count} изображений')
 
 
-async def main() -> None:
+async def main():
     # Инициализируем парсер и отчёт
     all_links_report = Report('links.json')
     count_links_report = Report('count.json')
@@ -30,6 +30,7 @@ async def main() -> None:
     async with aiohttp.ClientSession() as session:
         # Получаем разметку страницы
         page = await Parser.get_page(session, PARSING_URL)
+
         if page is None:
             return
 
@@ -39,6 +40,7 @@ async def main() -> None:
         all_links_report.write_all_links(links)
 
         tasks = []
+
         for link in links:
             task = asyncio.create_task(get_count_images(session, link, count_links_report))
             tasks.append(task)
@@ -47,4 +49,9 @@ async def main() -> None:
 
 
 if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(main())
+    if platform.system() == 'Windows':
+        asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(asyncio.new_event_loop())
+    asyncio.run(main())
