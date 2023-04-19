@@ -28,7 +28,8 @@ class Parser:
         # Собираем все атрибуты "href" из ссылок
         links = []
         for link in page.find_all('a'):
-            # Если у ссылки есть атрибут "href" и ссылка имеет валидный формат, то добавляем "href" в список
+            # Если у ссылки есть атрибут "href" и ссылка имеет валидный формат,
+            # то добавляем "href" в список
             if (href := link.get('href')) and validators.url(link['href']):
                 links.append(href)
 
@@ -42,4 +43,3 @@ class Parser:
         """
 
         return len(page.find_all('img'))
-
